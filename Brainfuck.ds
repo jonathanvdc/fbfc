@@ -47,28 +47,35 @@ namespace Flame.Brainfuck
         public const this(set ICompilerLog Log, IBinder Binder)
         {
             var consoleType = Binder.BindType("System.Console");
-            var methods = consoleType.GetAllMethods();
-            WriteMethod = methods.GetMethod("Write", true, PrimitiveTypes.Void, new IType[] { PrimitiveTypes.Char });
-            ReadMethod = methods.GetMethod("Read", true, PrimitiveTypes.Char, new IType[] { });
-            if (ReadMethod == null)
+            if (consoleType == null)
             {
-                ReadMethod = methods.GetMethod("Read", true, PrimitiveTypes.Int32, new IType[] { });
-            }
-            if (WriteMethod != null)
-            {
-                Log.LogEvent(new LogEntry("Output method found", "'void " + WriteMethod.FullName + "(" + WriteMethod.GetParameters()[0].ParameterType.Name + ")' has been found."));
+                Log.LogWarning(new LogEntry("Console not found", "System.Console was not found for this environment. IO calls will be replaced with constants."))
             }
             else
             {
-                Log.LogWarning(new LogEntry("Output method not found", "'void System.Console.Write(char)' was not been found for this environment."));
-            }
-            if (ReadMethod != null)
-            {
-                Log.LogEvent(new LogEntry("Input method found", "'" + ReadMethod.ReturnType.Name + " " + ReadMethod.FullName + "()' has been found."));
-            }
-            else
-            {
-                Log.LogWarning(new LogEntry("Input method not found", "'char System.Console.Read()' was not been found for this environment."));
+                var methods = consoleType.GetAllMethods();
+                WriteMethod = methods.GetMethod("Write", true, PrimitiveTypes.Void, new IType[] { PrimitiveTypes.Char });
+                ReadMethod = methods.GetMethod("Read", true, PrimitiveTypes.Char, new IType[] { });
+                if (ReadMethod == null)
+                {
+                    ReadMethod = methods.GetMethod("Read", true, PrimitiveTypes.Int32, new IType[] { });
+                }
+                if (WriteMethod != null)
+                {
+                    Log.LogEvent(new LogEntry("Output method found", "'void " + WriteMethod.FullName + "(" + WriteMethod.GetParameters()[0].ParameterType.Name + ")' has been found."));
+                }
+                else
+                {
+                    Log.LogWarning(new LogEntry("Output method not found", "'void System.Console.Write(char)' was not been found for this environment. No output will be written."));
+                }
+                if (ReadMethod != null)
+                {
+                    Log.LogEvent(new LogEntry("Input method found", "'" + ReadMethod.ReturnType.Name + " " + ReadMethod.FullName + "()' has been found."));
+                }
+                else
+                {
+                    Log.LogWarning(new LogEntry("Input method not found", "'char System.Console.Read()' was not been found for this environment. No output will be read."));
+                }
             }
         }
 
@@ -79,6 +86,9 @@ namespace Flame.Brainfuck
 
         public const IStatement CreateWriteStatement(IExpression Value)
         {
+            if (WriteMethod == null)
+                return new EmptyStatement();
+
             return new ExpressionStatement(new InvocationExpression(WriteMethod, null,
                 new IExpression[] {
                     new ConversionExpression(Value, WriteMethod.GetParameters()[0].ParameterType)
@@ -87,6 +97,9 @@ namespace Flame.Brainfuck
 
         public const IExpression CreateReadExpression(IType TargetType)
         {
+            if (ReadMethod == null)
+                return new ConversionExpression(new Int8Expression(0), TargetType);
+
             return new ConversionExpression(new InvocationExpression(ReadMethod, null, new IExpression[] { }), TargetType);
         }
 
