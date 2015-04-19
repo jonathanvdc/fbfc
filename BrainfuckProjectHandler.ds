@@ -1,0 +1,53 @@
+using Flame;
+using Flame.Compiler;
+using Flame.Compiler.Projects;
+using Flame.Brainfuck;
+using Flame.Front;
+using Flame.Front.Projects;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace fbf
+{
+    public static class BrainfuckProjectHandler : IProjectHandler
+    {
+        public [string] Extensions
+        {
+            const get { return new string[] { "bf" }; }
+        }
+
+        public const IProject Parse(ProjectPath Path, ICompilerLog Log)
+        {
+            return new SingleFileProject(Path);
+        }
+
+        public Task<IAssembly> CompileAsync(IProject Project, CompilationParameters Parameters)
+        {
+            var binderTask = Parameters.BinderTask;
+            binderTask.Wait(); // Wait manually
+            var binder = binderTask.Result;
+
+            var srcItems = Project.GetSourceItems();
+
+            var mainItem = Enumerable.FirstOrDefault<IProjectSourceItem>(srcItems);
+
+            if (Enumerable.Any<IProjectSourceItem>(Enumerable.Skip<IProjectSourceItem>(srcItems, 1)))
+            {
+                Parameters.Log.LogError(new LogEntry("More than one source file.",
+                    "Multiple brainfuck source file cannot be linked together. " +
+                    "Only '" + mainItem.Name + "' will be compiled."));
+            }
+
+            var code = ProjectHandlerHelpers.GetSourceSafe(mainItem, Parameters);
+            if (code == null)
+            {
+                return null;
+            }
+
+            var compiler = new Compiler(Parameters.Log, binder); // Create a brainfuck compiler
+
+            return Task.FromResult<IAssembly>(compiler.Compile(Project.Name, code));
+        }
+    }
+}

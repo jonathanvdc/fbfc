@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Project Name="fbfc">
+  <Setter Property="TargetPlatform" Value="CLR/release-console" />
+  <Setter Property="AssemblyName" Value="fbfc" />
+  <Option Key="platform" Value="CLR" />
+  <Option Key="pedantic" Value="true" />
+  <ItemGroup>
+    <RuntimeLibrary Include="PortableRT" />
+    <RuntimeLibrary Include="System" />
+    <RuntimeLibrary Include="System.Core" />
+    <RuntimeLibrary Include="Flame" />
+    <RuntimeLibrary Include="Flame.Compiler" />
+    <RuntimeLibrary Include="Flame.Front" />
+    <RuntimeLibrary Include="Flame.Front.Common" />
+    <RuntimeLibrary Include="Pixie" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Brainfuck.ds" />
+    <Compile Include="BrainfuckProjectHandler.ds" />
+    <Compile Include="Program.ds" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,17 @@
+using Flame.Brainfuck;
+using Flame.Front;
+using Flame.Front.Cli;
+using Flame.Front.Projects;
+
+namespace fbf
+{
+    public static class Program
+    {
+        public static void Main(string[] args)
+        {
+            ProjectHandlers.RegisterHandler(BrainfuckProjectHandler);
+            var compiler = new ConsoleCompiler("fbfc", "Flame's brainfuck compiler", "https://github.com/jonathanvdc/fbfc/releases");
+            compiler.Compile(args);
+        }
+    }
+}
