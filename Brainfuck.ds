@@ -49,7 +49,7 @@ namespace Flame.Brainfuck
             var consoleType = Binder.BindType("System.Console");
             if (consoleType == null)
             {
-                Log.LogWarning(new LogEntry("Console not found", "System.Console was not found for this environment. IO calls will be replaced with constants."))
+                Log.LogWarning(new LogEntry("Console not found", "System.Console was not found for environment '" + Binder.Environment.Name + "'. IO calls will be replaced with constants."))
             }
             else
             {
@@ -66,7 +66,7 @@ namespace Flame.Brainfuck
                 }
                 else
                 {
-                    Log.LogWarning(new LogEntry("Output method not found", "'void System.Console.Write(char)' was not been found for this environment. No output will be written."));
+                    Log.LogWarning(new LogEntry("Output method not found", "'void System.Console.Write(char)' was not been found for environment '" + Binder.Environment.Name + "'. No output will be written."));
                 }
                 if (ReadMethod != null)
                 {
@@ -74,7 +74,7 @@ namespace Flame.Brainfuck
                 }
                 else
                 {
-                    Log.LogWarning(new LogEntry("Input method not found", "'char System.Console.Read()' was not been found for this environment. No output will be read."));
+                    Log.LogWarning(new LogEntry("Input method not found", "'char System.Console.Read()' was not been found for environment '" + Binder.Environment.Name + "'. No output will be read."));
                 }
             }
         }
