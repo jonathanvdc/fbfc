@@ -95,12 +95,29 @@ namespace Flame.Brainfuck
                 }));
         }
 
+        private IExpression readExpr;
         public const IExpression CreateReadExpression(IType TargetType)
         {
-            if (ReadMethod == null)
-                return new ConversionExpression(new Int8Expression(0), TargetType);
+            if (readExpr == null)
+            {
+                if (ReadMethod == null)
+                    readExpr = new ConversionExpression(new Int8Expression(0), TargetType);
 
-            return new ConversionExpression(new InvocationExpression(ReadMethod, null, new IExpression[] { }), TargetType);
+                var call = new InvocationExpression(ReadMethod, null, new IExpression[] { });
+
+                if (ReadMethod.ReturnType.IsSignedInteger)
+                {
+                    var resultVariable = new LateBoundVariable(ReadMethod.ReturnType);
+                    var resultSet = resultVariable.CreateSetStatement(call);
+                    var resultExpr = resultVariable.CreateGetExpression();
+                    var zero = new ConversionExpression(new Int8Expression(0), ReadMethod.ReturnType);
+                    var selectExpr = new SelectExpression(new GreaterThanExpression(resultExpr, zero), resultExpr, zero);
+                    return new InitializedExpression(resultSet, selectExpr, resultVariable.CreateReleaseStatement());
+                }
+                else
+                    readExpr = new ConversionExpression(call, TargetType);
+            }
+            return readExpr;
         }
 
         public const IAssembly Compile(string Name, ISourceDocument Code)

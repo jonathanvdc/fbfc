@@ -14,7 +14,7 @@ namespace fbf
     {
         public [string] Extensions
         {
-            const get { return new string[] { "bf" }; }
+            const get { return new string[] { "bf", "b" }; }
         }
 
         public const IProject Parse(ProjectPath Path, ICompilerLog Log)
