@@ -107,12 +107,12 @@ namespace Flame.Brainfuck
 
                 if (ReadMethod.ReturnType.IsSignedInteger)
                 {
-                    var resultVariable = new LateBoundVariable(ReadMethod.ReturnType);
+                    var resultVariable = new LateBoundVariable("temp", ReadMethod.ReturnType);
                     var resultSet = resultVariable.CreateSetStatement(call);
                     var resultExpr = resultVariable.CreateGetExpression();
                     var zero = new ConversionExpression(new Int8Expression(0), ReadMethod.ReturnType);
                     var selectExpr = new SelectExpression(new GreaterThanExpression(resultExpr, zero), resultExpr, zero);
-                    return new InitializedExpression(resultSet, selectExpr, resultVariable.CreateReleaseStatement());
+                    return new InitializedExpression(resultSet, selectExpr); // Do not release the temporary as we are already reusing it
                 }
                 else
                     readExpr = new ConversionExpression(call, TargetType);
