@@ -4,6 +4,8 @@ using Flame.Compiler.Projects;
 using Flame.Brainfuck;
 using Flame.Front;
 using Flame.Front.Projects;
+using Flame.Front.Target;
+using Flame.Front.Options;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,7 +21,7 @@ namespace fbf
 
         public const IProject Parse(ProjectPath Path, ICompilerLog Log)
         {
-            return new SingleFileProject(Path);
+            return new SingleFileProject(Path, Log.Options.GetTargetPlatform());
         }
 
         public Task<IAssembly> CompileAsync(IProject Project, CompilationParameters Parameters)
@@ -48,6 +50,21 @@ namespace fbf
             var compiler = new Compiler(Parameters.Log, binder); // Create a brainfuck compiler
 
             return Task.FromResult<IAssembly>(compiler.Compile(Project.Name, code));
+        }
+
+        public const [ParsedProject] Partition([ParsedProject] Projects)
+        {
+            return Projects;
+        }
+
+        public const IProject MakeProject(IProject Target, ProjectPath Path, ICompilerLog Log)
+        {
+            return Target;
+        }
+
+        public const PassPreferences GetPassPreferences(ICompilerLog Log)
+        {
+            return new PassPreferences();
         }
     }
 }
